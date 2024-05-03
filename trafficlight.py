@@ -53,44 +53,103 @@ def backward_car_wait_time_calculate(n, time_lag ,red, green, drive_time, nudge=
     return wait_time
 
 
-# red = 10 # red time
-# green = 12 # green time
-# time_lag = 0 # lag between traffic lights
-# n = 2 # number of traffic lights
 
-# is_green = np.ones(n, dtype=bool) # by default every traffic light is green
-# x = 0 # total time behind redlight
-# # forward car:
-# for t in range(red+green):
-#     for i in range(n):
-#         if not is_green[i]:
-#             x += t - red
+######################################################################
+
+red = 5 # red time
+green = 10 # green time
+n = 10
+drive_time = 3
+
+forward_wait, backward_wait = np.zeros(red+green), np.zeros(red+green)
+for time_lag in range(red+green):
+    for nudge in range(red+green):
+        forward_wait[time_lag] += forward_car_wait_time_calculate(n, time_lag, red, green, drive_time, nudge)
+        backward_wait[time_lag] += backward_car_wait_time_calculate(n, time_lag, red, green, drive_time, nudge)
+    forward_wait[time_lag] /= (red+green)
+    backward_wait[time_lag] /= (red+green)
+
+# plt.plot(forward_wait)
+# plt.plot(backward_wait)
+plt.plot(forward_wait + backward_wait)
+plt.xlabel('lag time')
+plt.ylabel('forward + backward time')
+plt.show()
+
+######################################################################
+
+n = 6
+drive_time = 3
+min_wait = np.zeros((10,10))
+
+for red in np.arange(1,11):
+    print(red)
+    for green in np.arange(1,11):
+
+        forward_wait, backward_wait = np.zeros(red+green), np.zeros(red+green)
+        for time_lag in range(red+green):
+            for nudge in range(red+green):
+                forward_wait[time_lag] += forward_car_wait_time_calculate(n, time_lag, red, green, drive_time, nudge)
+                backward_wait[time_lag] += backward_car_wait_time_calculate(n, time_lag, red, green, drive_time, nudge)
+            forward_wait[time_lag] /= (red+green)
+            backward_wait[time_lag] /= (red+green)
+        min_wait[red-1,green-1] = np.min(forward_wait + backward_wait)
+
+plt.imshow(min_wait)
+plt.colorbar(label='waiting time')
+plt.xlabel('red time')
+plt.ylabel('green time')
+plt.show()
 
 
-# for i in range(n):
-#     if time_lag * i > red:
-#         is_green[i] = True
+######################################################################
 
-        # if t_one_cycle == -green + time_lag * i:
-        #     is_green[i] = False
-        # if t_one_cycle == time_lag * i:
-        #     is_green[i] = True
-        # if t_one_cycle == green + time_lag * i:
-        #     is_green[i] = False
+n = 11
+green = 10
+min_wait = np.zeros((10,10))
+
+for red in np.arange(1,11):
+    print(red)
+    for drive_time in range(green):
+
+        forward_wait, backward_wait = np.zeros(red+green), np.zeros(red+green)
+        for time_lag in range(red+green):
+            for nudge in range(red+green):
+                forward_wait[time_lag] += forward_car_wait_time_calculate(n, time_lag, red, green, drive_time, nudge)
+                backward_wait[time_lag] += backward_car_wait_time_calculate(n, time_lag, red, green, drive_time, nudge)
+            forward_wait[time_lag] /= (red+green)
+            backward_wait[time_lag] /= (red+green)
+
+        min_wait[red-1,drive_time] = np.min(forward_wait + backward_wait)
+        
+plt.imshow(min_wait)
+plt.colorbar(label='waiting time')
+plt.xlabel('red time')
+plt.ylabel('drive time between two traffic lights')
+plt.show()
+
+######################################################################
+
+n = 6
+drive_time = 3
+green = 10
+min_wait = np.zeros(10)
+
+for i, red in enumerate(np.arange(1,21,2)):
+    print(i)
+    forward_wait, backward_wait = np.zeros(red+green), np.zeros(red+green)
+    for time_lag in range(red+green):
+        for nudge in range(red+green):
+            forward_wait[time_lag] += forward_car_wait_time_calculate(n, time_lag, red, green, drive_time, nudge)
+            backward_wait[time_lag] += backward_car_wait_time_calculate(n, time_lag, red, green, drive_time, nudge)
+        forward_wait[time_lag] /= (red+green)
+        backward_wait[time_lag] /= (red+green)
+    # min_wait[i] = np.min(forward_wait + backward_wait)
+    min_wait[i] = np.min(forward_wait + backward_wait) / red
+
+plt.plot(np.arange(1,21,2), min_wait)
+plt.xlabel('red time')
+plt.ylabel('waiting time')
+plt.show()
 
 
-
-# for t in range(2*(red+green)):
-
-    # if status[i] == False:
-    #     wait_time += 1
-    # else:
-    #     i += 1
-
-
-
-# forward_wait, backward_wait = np.zeros((10,20)), np.zeros((10,20))
-# for red in np.arange(1,11):
-#     for time_lag in np.arange(red+green):
-#         forward_wait[red-1,time_lag] = forward_car_wait_time_calculate(n, time_lag, red, green, drive_time)
-#         backward_wait[red-1,time_lag] = backward_car_wait_time_calculate(n, time_lag, red, green, drive_time)
